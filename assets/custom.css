@@ -1,0 +1,86 @@
+body {
+  font-family: "Poppins", sans-serif;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  background-color: #ffffff;
+  border-bottom: 5px solid #909090;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar img {
+  height: 90px;
+  margin-right: 20px;
+}
+
+.navbar h1 {
+  flex: 1;
+  color: blue;
+  text-align: center;
+}
+
+.sidebar {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-right: 1px solid #ddd;
+  position: fixed;
+  top: 110px;
+  bottom: 0;
+  width: 250px;
+  overflow-y: auto;
+}
+
+.sidebar h2,
+.sidebar p {
+  margin: 10px 0;
+}
+
+.sidebar .fa {
+  margin-right: 10px;
+}
+
+.content {
+  padding: 20px;
+  margin-left: 270px;
+  margin-top: 110px;
+}
+
+.card {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin: 5px;
+  text-align: center;
+  flex: 1;
+}
+
+.card h3,
+.card p {
+  font-family: "Roboto", sans-serif;
+}
+
+.filters {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-right: 1px solid #ddd;
+  font-family: "Roboto", sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.labelStyle {
+  display: block;
+  margin: 5px;
+  padding: 5px;
+}
