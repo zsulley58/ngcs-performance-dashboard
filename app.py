@@ -1,9 +1,9 @@
 import dash
-from dash import dcc, html
-from dash.dependencies import Input, Output, State
+from dash import dcc, html, Input, Output
 import pandas as pd
 import plotly.express as px
 import os
+import pdfkit
 
 # Initialize the Dash app
 app = dash.Dash(__name__, external_stylesheets=[
@@ -41,17 +41,27 @@ app.layout = html.Div(children=[
     ),
     html.Div(
         children=[
+            html.Div('Home', id='breadcrumb', className='breadcrumb'),
+            html.Button('Generate PDF Report', id='pdf-button',
+                        n_clicks=0, className='pdf-button'),
+            html.Div(id='pdf-output', style={'display': 'none'})
+        ],
+        className='pdf-container'
+    ),
+    html.Div(
+        children=[
             html.Div(
                 children=[
                     html.H2("Views"),
                     html.Hr(),
-                    html.P([html.I(className="fa fa-tachometer"), " Metrics"]),
-                    html.A([html.I(className="fa fa-tachometer"), " Pressure"],
-                           href="/metrics/pressure", className="link"),
-                    html.A([html.I(className="fa fa-thermometer-half"), " Temperature"],
-                           href="/metrics/temperature", className="link"),
-                    html.A([html.I(className="fa fa-tachometer"), " Flow Rate"],
-                           href="/metrics/flow_rate", className="link"),
+                    html.P(
+                        [html.I(className="fa fa-tachometer pressure-icon"), " Metrics"]),
+                    html.A([html.I(className="fa fa-tachometer pressure-icon"), " Pressure"],
+                           href="/metrics/pressure", className="link pressure-link"),
+                    html.A([html.I(className="fa fa-thermometer-half temperature-icon"), " Temperature"],
+                           href="/metrics/temperature", className="link temperature-link"),
+                    html.A([html.I(className="fa fa-tachometer flow-icon"), " Flow Rate"],
+                           href="/metrics/flow_rate", className="link flow-link"),
                     html.Hr(),
                     html.P([html.I(className="fa fa-clock-o"), " Time Range"]),
                     html.A([html.I(className="fa fa-sun-o"), " Day"],
@@ -87,7 +97,7 @@ app.layout = html.Div(children=[
                             html.P(f'{avg_flow_rate:.2f} mmscfd',
                                    className='card')
                         ], className='card'),
-                    ], className='content', style={'display': 'flex', 'justifyContent': 'space-around', 'marginBottom': '20px'}),
+                    ], className='card-container'),
 
                     dcc.Graph(id='real-time-graph'),
                     dcc.Graph(id='historical-graph')
@@ -105,25 +115,26 @@ app.layout = html.Div(children=[
 @app.callback(
     Output('real-time-graph', 'figure'),
     Output('historical-graph', 'figure'),
+    Output('breadcrumb', 'children'),
     Input('url', 'pathname')
 )
 def update_graphs(pathname):
     # Determine the selected time range and metrics based on the URL path
     time_range_map = {
-        '/time/day': 'D',
-        '/time/week': 'W',
-        '/time/month': 'M',
-        '/time/quarter': 'Q',
-        '/time/year': 'Y'
+        '/time/day': 'Day',
+        '/time/week': 'Week',
+        '/time/month': 'Month',
+        '/time/quarter': 'Quarter',
+        '/time/year': 'Year'
     }
     metric_map = {
-        '/metrics/pressure': 'pressure',
-        '/metrics/temperature': 'temperature',
-        '/metrics/flow_rate': 'flow_rate'
+        '/metrics/pressure': 'Pressure',
+        '/metrics/temperature': 'Temperature',
+        '/metrics/flow_rate': 'Flow Rate'
     }
 
-    selected_time_range = 'D'
-    selected_metrics = ['pressure', 'temperature', 'flow_rate']
+    selected_time_range = 'Day'
+    selected_metrics = ['Pressure', 'Temperature', 'Flow Rate']
 
     for key, value in time_range_map.items():
         if key in pathname:
@@ -135,9 +146,9 @@ def update_graphs(pathname):
 
     # Filter data based on selected time range
     filtered_real_time_data = real_time_data.resample(
-        selected_time_range, on='timestamp').mean()
+        selected_time_range[0], on='timestamp').mean()
     filtered_historical_data = historical_data.resample(
-        selected_time_range, on='timestamp').mean()
+        selected_time_range[0], on='timestamp').mean()
 
     # Create figures
     fig_real_time = px.line(filtered_real_time_data, x='timestamp',
@@ -145,7 +156,32 @@ def update_graphs(pathname):
     fig_historical = px.line(filtered_historical_data, x='timestamp',
                              y=selected_metrics, title='Historical Data')
 
-    return fig_real_time, fig_historical
+    # Create breadcrumb
+    breadcrumb = html.Div([
+        html.A('Home', href='/'),
+        ' / ',
+        html.Span(f'{selected_metrics[0]} - {selected_time_range}')
+    ])
+
+    return fig_real_time, fig_historical, breadcrumb
+
+# Callback to generate PDF
+
+
+@app.callback(
+    Output('pdf-output', 'children'),
+    Input('pdf-button', 'n_clicks'),
+    prevent_initial_call=True
+)
+def generate_pdf(n_clicks):
+    if n_clicks > 0:
+        # Generate PDF of current view
+        options = {
+            'page-size': 'Letter',
+            'encoding': 'UTF-8',
+        }
+        pdfkit.from_url('http://localhost:8050', 'report.pdf', options=options)
+        return html.A('Download PDF', href='/report.pdf')
 
 
 # Run the Dash app
