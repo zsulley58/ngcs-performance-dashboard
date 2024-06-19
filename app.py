@@ -62,7 +62,7 @@ app.layout = html.Div(children=[
                            href="/time/month", className="link"),
                     html.A([html.I(className="fa fa-calendar-check-o"),
                            " Quarter"], href="/time/quarter", className="link"),
-                    html.A([html.I(className="fa fa-calendar-alt"),
+                    html.A([html.I(className="fa fa-calendar-check-o"),
                            " Year"], href="/time/year", className="link"),
                 ],
                 className='sidebar'

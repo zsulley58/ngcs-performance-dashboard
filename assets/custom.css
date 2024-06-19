@@ -33,6 +33,7 @@ body {
 .sidebar {
   padding: 20px;
   background-color: #fff;
+  color: #555555;
   border-right: 5px solid #0056b3;
   position: fixed;
   top: 110px;
@@ -56,10 +57,12 @@ body {
 .sidebar h2,
 .sidebar p {
   margin: 10px 0;
+  color: #555555;
 }
 
 .sidebar .fa {
   margin-right: 10px;
+  color: #555555;
 }
 
 .content {
@@ -86,7 +89,7 @@ body {
 
 .filters {
   padding: 20px;
-  background-color: #f8f9fa;
+  background-color: #fff;
   border-right: 1px solid #ddd;
   font-family: "Roboto", sans-serif;
 }
