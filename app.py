@@ -82,20 +82,20 @@ app.layout = html.Div(children=[
                     html.Div(children=[
                         html.Div(children=[
                             html.H3('Average Pressure'),
-                            html.P(f'{avg_pressure:.2f} barg',
-                                   className='card')
+                            html.P(f'{avg_pressure:.2f}', className='card'),
+                            html.P('barg', className='lower-card')
                         ], className='card'),
 
                         html.Div(children=[
                             html.H3('Average Temperature'),
-                            html.P(f'{avg_temperature:.2f} °C',
-                                   className='card')
+                            html.P(f'{avg_temperature:.2f}', className='card'),
+                            html.P('°C', className='lower-card')
                         ], className='card'),
 
                         html.Div(children=[
                             html.H3('Average Flow Rate'),
-                            html.P(f'{avg_flow_rate:.2f} mmscfd',
-                                   className='card')
+                            html.P(f'{avg_flow_rate:.2f}', className='card'),
+                            html.P('mmscfd', className='lower-card')
                         ], className='card'),
                     ], className='card-container'),
 
