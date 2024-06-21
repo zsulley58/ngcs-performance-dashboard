@@ -22,9 +22,8 @@ navbar = dbc.Navbar(
         ],
         fluid=True,
     ),
-    color="primary",
     dark=True,
-    className="navbar"
+    className="navbar custom-navbar"
 )
 
 # Define the sidebar

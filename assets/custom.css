@@ -6,8 +6,6 @@ body {
 
 .navbar {
   margin-bottom: 20px;
-  background-color: #ffffff; /* Changed background color to white */
-  color: #007bff;
   border-radius: 5px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 10px 20px;
@@ -29,6 +27,10 @@ body {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.mx-auto {
+  color: #007bff;
 }
 
 .sidebar {
