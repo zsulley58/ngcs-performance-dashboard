@@ -5,15 +5,17 @@ body {
 }
 
 .navbar {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   border-radius: 5px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
   padding: 10px 20px;
   top: 20px;
+  background-color: #02478b;
 }
 
 .navbar-logo {
   margin-right: 10px;
+  height: 70px;
 }
 
 .navbar-brand {
@@ -31,12 +33,18 @@ body {
 
 .mx-auto {
   color: #007bff;
+  font-size: 2rem;
+  display: flex;
+  gap: 20px;
 }
 
 .sidebar {
   background-color: #f8f9fa;
   padding: 10px;
   height: 100vh;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  padding: 10px 20px;
 }
 
 .main-content {

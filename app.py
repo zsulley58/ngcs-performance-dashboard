@@ -17,13 +17,19 @@ navbar = dbc.Navbar(
                          height="60px", className="navbar-logo"),
                 href="/",
             ),
-            dbc.NavbarBrand("AMCS PERFORMANCE REPORT DASHBOARD",
-                            className="mx-auto"),
+            dbc.NavbarBrand(
+                [
+                    # Dashboard icon
+                    "AMCS PERFORMANCE REPORT DASHBOARD",
+                    html.I(className="fas fa-chart-line mr-2")
+                ],
+                className="mx-auto"
+            ),
         ],
         fluid=True,
     ),
     dark=True,
-    className="navbar custom-navbar"
+    className="navbar"
 )
 
 # Define the sidebar
@@ -42,23 +48,26 @@ sidebar = dbc.Nav(
             href="/flow", id="flow-link", className="nav-link"
         ),
         html.Hr(),
-        html.P("Select Time Range:", className="sidebar-title"),
-        dbc.RadioItems(
-            options=[
-                {"label": [
-                    html.I(className="fas fa-calendar-day mr-2"), "Day"], "value": "day"},
-                {"label": [
-                    html.I(className="fas fa-calendar-week mr-2"), "Week"], "value": "week"},
-                {"label": [
-                    html.I(className="fas fa-calendar-alt mr-2"), "Month"], "value": "month"},
-                {"label": [html.I(
-                    className="fas fa-calendar-quarter mr-2"), "Quarter"], "value": "quarter"},
-                {"label": [html.I(className="fas fa-calendar mr-2"),
-                           "Year"], "value": "year"},
-            ],
-            value="day",
-            id="time-range",
-            className="radio-items"
+
+        dbc.NavLink(
+            [html.I(className="fas fa-calendar-day mr-2"), "Day"],
+            href="/day", id="day-link", className="nav-link"
+        ),
+        dbc.NavLink(
+            [html.I(className="fas fa-calendar-week mr-2"), "Week"],
+            href="/week", id="week-link", className="nav-link"
+        ),
+        dbc.NavLink(
+            [html.I(className="fas fa-calendar-alt mr-2"), "Month"],
+            href="/month", id="month-link", className="nav-link"
+        ),
+        dbc.NavLink(
+            [html.I(className="fas fa-calendar-quarter mr-2"), "Quarter"],
+            href="/quarter", id="quarter-link", className="nav-link"
+        ),
+        dbc.NavLink(
+            [html.I(className="fas fa-calendar mr-2"), "Year"],
+            href="/year", id="year-link", className="nav-link"
         ),
     ],
     vertical=True,
@@ -89,9 +98,13 @@ app.layout = dbc.Container(
     [Input("pressure-link", "n_clicks"),
      Input("temperature-link", "n_clicks"),
      Input("flow-link", "n_clicks"),
-     Input("time-range", "value")]
+     Input("day-link", "n_clicks"),
+     Input("week-link", "n_clicks"),
+     Input("month-link", "n_clicks"),
+     Input("quarter-link", "n_clicks"),
+     Input("year-link", "n_clicks")]
 )
-def display_page(pressure_clicks, temperature_clicks, flow_clicks, time_range):
+def display_page(pressure_clicks, temperature_clicks, flow_clicks, day_clicks, week_clicks, month_clicks, quarter_clicks, year_clicks):
     ctx = dash.callback_context
 
     if not ctx.triggered:
@@ -100,19 +113,21 @@ def display_page(pressure_clicks, temperature_clicks, flow_clicks, time_range):
         button_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
         if button_id == "pressure-link":
-            return html.Div(f"Pressure page content - Time Range: {time_range}")
+            return html.Div("Pressure page content")
         elif button_id == "temperature-link":
-            return html.Div(f"Temperature page content - Time Range: {time_range}")
+            return html.Div("Temperature page content")
         elif button_id == "flow-link":
-            return html.Div(f"Flow page content - Time Range: {time_range}")
-        elif button_id == "time-range":
-            # Update based on the currently selected page
-            current_page = [p["props"]["children"]
-                            for p in sidebar.children if "active" in p["props"]["className"]]
-            if current_page:
-                return html.Div(f"{current_page[0]} page content - Time Range: {time_range}")
-            else:
-                return html.Div("Welcome to the AMCS PERFORMANCE REPORT DASHBOARD")
+            return html.Div("Flow page content")
+        elif button_id == "day-link":
+            return html.Div("Day page content")
+        elif button_id == "week-link":
+            return html.Div("Week page content")
+        elif button_id == "month-link":
+            return html.Div("Month page content")
+        elif button_id == "quarter-link":
+            return html.Div("Quarter page content")
+        elif button_id == "year-link":
+            return html.Div("Year page content")
 
 
 if __name__ == "__main__":
