@@ -1,189 +1,120 @@
 import dash
-from dash import dcc, html, Input, Output
-import pandas as pd
-import plotly.express as px
-import os
-import pdfkit
+import dash_bootstrap_components as dbc
+from dash import html, dcc
+from dash.dependencies import Input, Output
 
-# Initialize the Dash app
+# Initialize the app
 app = dash.Dash(__name__, external_stylesheets=[
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'
+    dbc.themes.BOOTSTRAP, "https://use.fontawesome.com/releases/v5.15.4/css/all.css"
 ])
-app.title = 'Natural Gas Compression Station Performance Dashboard'
 
-# Load data
-data_dir = os.path.join(os.path.dirname(__file__), 'data')
-real_time_file_path = os.path.join(data_dir, 'aggregated_real_time_data.xlsx')
-historical_file_path = os.path.join(
-    data_dir, 'aggregated_historical_data.xlsx')
-
-real_time_data = pd.read_excel(real_time_file_path, engine='openpyxl')
-historical_data = pd.read_excel(historical_file_path, engine='openpyxl')
-
-# Ensure the 'timestamp' column exists and is in datetime format
-real_time_data['timestamp'] = pd.to_datetime(real_time_data['timestamp'])
-historical_data['timestamp'] = pd.to_datetime(historical_data['timestamp'])
-
-# Calculate averages
-avg_pressure = real_time_data['pressure'].mean()
-avg_temperature = real_time_data['temperature'].mean()
-avg_flow_rate = real_time_data['flow_rate'].mean()
-
-# Define the layout of the dashboard
-app.layout = html.Div(children=[
-    dcc.Location(id='url', refresh=False),
-    html.Div(
-        children=[
-            html.Img(src='/assets/ghanagas_logo.png'),
-            html.H1('AMCS PERFORMANCE REPORT DASHBOARD')
-        ],
-        className='navbar'
-    ),
-    html.Div(
-        children=[
-            html.Div('Home', id='breadcrumb', className='breadcrumb'),
-            html.Button('Generate PDF Report', id='pdf-button',
-                        n_clicks=0, className='pdf-button'),
-            html.Div(id='pdf-output', style={'display': 'none'})
-        ],
-        className='pdf-container'
-    ),
-    html.Div(
-        children=[
-            html.Div(
-                children=[
-                    html.H2("Views"),
-                    html.Hr(),
-                    html.P(
-                        [html.I(className="fa fa-tachometer pressure-icon"), " Metrics"]),
-                    html.A([html.I(className="fa fa-tachometer pressure-icon"), " Pressure"],
-                           href="/metrics/pressure", className="link pressure-link"),
-                    html.A([html.I(className="fa fa-thermometer-half temperature-icon"), " Temperature"],
-                           href="/metrics/temperature", className="link temperature-link"),
-                    html.A([html.I(className="fa fa-tachometer flow-icon"), " Flow Rate"],
-                           href="/metrics/flow_rate", className="link flow-link"),
-                    html.Hr(),
-                    html.P([html.I(className="fa fa-clock-o"), " Time Range"]),
-                    html.A([html.I(className="fa fa-sun-o"), " Day"],
-                           href="/time/day", className="link"),
-                    html.A([html.I(className="fa fa-calendar-o"), " Week"],
-                           href="/time/week", className="link"),
-                    html.A([html.I(className="fa fa-calendar"), " Month"],
-                           href="/time/month", className="link"),
-                    html.A([html.I(className="fa fa-calendar-check-o"),
-                           " Quarter"], href="/time/quarter", className="link"),
-                    html.A([html.I(className="fa fa-calendar-check-o"),
-                           " Year"], href="/time/year", className="link"),
-                ],
-                className='sidebar'
+# Define the navbar
+navbar = dbc.Navbar(
+    dbc.Container(
+        [
+            html.A(
+                html.Img(src="/assets/ghanagas_logo.png",
+                         height="60px", className="navbar-logo"),
+                href="/",
             ),
-            html.Div(
-                children=[
-                    html.Div(children=[
-                        html.Div(children=[
-                            html.H3('Average Pressure'),
-                            html.P(f'{avg_pressure:.2f}', className='card'),
-                            html.P('barg', className='lower-card')
-                        ], className='card'),
-
-                        html.Div(children=[
-                            html.H3('Average Temperature'),
-                            html.P(f'{avg_temperature:.2f}', className='card'),
-                            html.P('°C', className='lower-card')
-                        ], className='card'),
-
-                        html.Div(children=[
-                            html.H3('Average Flow Rate'),
-                            html.P(f'{avg_flow_rate:.2f}', className='card'),
-                            html.P('mmscfd', className='lower-card')
-                        ], className='card'),
-                    ], className='card-container'),
-
-                    dcc.Graph(id='real-time-graph'),
-                    dcc.Graph(id='historical-graph')
-                ],
-                className='content'
-            )
+            dbc.NavbarBrand("AMCS PERFORMANCE REPORT DASHBOARD",
+                            className="mx-auto"),
         ],
-        className='container'
-    )
-])
+        fluid=True,
+    ),
+    color="primary",
+    dark=True,
+    className="navbar"
+)
 
-# Callback to update the graphs based on selected metrics and time range
+# Define the sidebar
+sidebar = dbc.Nav(
+    [
+        dbc.NavLink(
+            [html.I(className="fas fa-tachometer-alt mr-2"), "Pressure"],
+            href="/pressure", id="pressure-link", className="nav-link"
+        ),
+        dbc.NavLink(
+            [html.I(className="fas fa-thermometer-half mr-2"), "Temperature"],
+            href="/temperature", id="temperature-link", className="nav-link"
+        ),
+        dbc.NavLink(
+            [html.I(className="fas fa-water mr-2"), "Flow"],
+            href="/flow", id="flow-link", className="nav-link"
+        ),
+        html.Hr(),
+        html.P("Select Time Range:", className="sidebar-title"),
+        dbc.RadioItems(
+            options=[
+                {"label": [
+                    html.I(className="fas fa-calendar-day mr-2"), "Day"], "value": "day"},
+                {"label": [
+                    html.I(className="fas fa-calendar-week mr-2"), "Week"], "value": "week"},
+                {"label": [
+                    html.I(className="fas fa-calendar-alt mr-2"), "Month"], "value": "month"},
+                {"label": [html.I(
+                    className="fas fa-calendar-quarter mr-2"), "Quarter"], "value": "quarter"},
+                {"label": [html.I(className="fas fa-calendar mr-2"),
+                           "Year"], "value": "year"},
+            ],
+            value="day",
+            id="time-range",
+            className="radio-items"
+        ),
+    ],
+    vertical=True,
+    pills=True,
+    className="sidebar"
+)
+
+# Define the layout
+app.layout = dbc.Container(
+    [
+        navbar,
+        dbc.Row(
+            [
+                dbc.Col(sidebar, width=2),
+                dbc.Col(html.Div(id="page-content",
+                        className="main-content"), width=10),
+            ]
+        ),
+    ],
+    fluid=True,
+)
+
+# Define the callback for page navigation and time range selection
 
 
 @app.callback(
-    Output('real-time-graph', 'figure'),
-    Output('historical-graph', 'figure'),
-    Output('breadcrumb', 'children'),
-    Input('url', 'pathname')
+    Output("page-content", "children"),
+    [Input("pressure-link", "n_clicks"),
+     Input("temperature-link", "n_clicks"),
+     Input("flow-link", "n_clicks"),
+     Input("time-range", "value")]
 )
-def update_graphs(pathname):
-    # Determine the selected time range and metrics based on the URL path
-    time_range_map = {
-        '/time/day': 'Day',
-        '/time/week': 'Week',
-        '/time/month': 'Month',
-        '/time/quarter': 'Quarter',
-        '/time/year': 'Year'
-    }
-    metric_map = {
-        '/metrics/pressure': 'Pressure',
-        '/metrics/temperature': 'Temperature',
-        '/metrics/flow_rate': 'Flow Rate'
-    }
+def display_page(pressure_clicks, temperature_clicks, flow_clicks, time_range):
+    ctx = dash.callback_context
 
-    selected_time_range = 'Day'
-    selected_metrics = ['Pressure', 'Temperature', 'Flow Rate']
+    if not ctx.triggered:
+        return html.Div("Welcome to the AMCS PERFORMANCE REPORT DASHBOARD")
+    else:
+        button_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
-    for key, value in time_range_map.items():
-        if key in pathname:
-            selected_time_range = value
-
-    for key, value in metric_map.items():
-        if key in pathname:
-            selected_metrics = [value]
-
-    # Filter data based on selected time range
-    filtered_real_time_data = real_time_data.resample(
-        selected_time_range[0], on='timestamp').mean()
-    filtered_historical_data = historical_data.resample(
-        selected_time_range[0], on='timestamp').mean()
-
-    # Create figures
-    fig_real_time = px.line(filtered_real_time_data, x='timestamp',
-                            y=selected_metrics, title='Real-Time Data')
-    fig_historical = px.line(filtered_historical_data, x='timestamp',
-                             y=selected_metrics, title='Historical Data')
-
-    # Create breadcrumb
-    breadcrumb = html.Div([
-        html.A('Home', href='/'),
-        ' / ',
-        html.Span(f'{selected_metrics[0]} - {selected_time_range}')
-    ])
-
-    return fig_real_time, fig_historical, breadcrumb
-
-# Callback to generate PDF
+        if button_id == "pressure-link":
+            return html.Div(f"Pressure page content - Time Range: {time_range}")
+        elif button_id == "temperature-link":
+            return html.Div(f"Temperature page content - Time Range: {time_range}")
+        elif button_id == "flow-link":
+            return html.Div(f"Flow page content - Time Range: {time_range}")
+        elif button_id == "time-range":
+            # Update based on the currently selected page
+            current_page = [p["props"]["children"]
+                            for p in sidebar.children if "active" in p["props"]["className"]]
+            if current_page:
+                return html.Div(f"{current_page[0]} page content - Time Range: {time_range}")
+            else:
+                return html.Div("Welcome to the AMCS PERFORMANCE REPORT DASHBOARD")
 
 
-@app.callback(
-    Output('pdf-output', 'children'),
-    Input('pdf-button', 'n_clicks'),
-    prevent_initial_call=True
-)
-def generate_pdf(n_clicks):
-    if n_clicks > 0:
-        # Generate PDF of current view
-        options = {
-            'page-size': 'Letter',
-            'encoding': 'UTF-8',
-        }
-        pdfkit.from_url('http://localhost:8050', 'report.pdf', options=options)
-        return html.A('Download PDF', href='/report.pdf')
-
-
-# Run the Dash app
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run_server(debug=True)
