@@ -37,21 +37,21 @@ sidebar = dbc.Nav(
         dbc.NavLink(
             [html.I(className="fas fa-chart-line mr-2"),
              html.Span("Overview")],
-            href="/overview", id="overview-link", className="nav-link side-text"
+            href="/overview", id="overview-link", className="nav-link"
         ),
         dbc.NavLink(
             [html.I(className="fas fa-tachometer-alt mr-2"),
              html.Span("Pressure")],
-            href="/pressure", id="pressure-link", className="nav-link side-text"
+            href="/pressure", id="pressure-link", className="nav-link"
         ),
         dbc.NavLink(
             [html.I(className="fas fa-thermometer-half mr-2"),
              html.Span("Temperature")],
-            href="/temperature", id="temperature-link", className="nav-link side-text"
+            href="/temperature", id="temperature-link", className="nav-link"
         ),
         dbc.NavLink(
             [html.I(className="fas fa-water mr-2"), html.Span("Flow")],
-            href="/flow", id="flow-link", className="nav-link side-text"
+            href="/flow", id="flow-link", className="nav-link"
         ),
         html.Hr(),
         dbc.NavLink(
