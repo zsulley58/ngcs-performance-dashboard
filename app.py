@@ -36,7 +36,7 @@ navbar = dbc.Navbar(
 sidebar = dbc.Nav(
     [
         dbc.NavLink(
-            [html.I(className="fa-brands fa-stack-overflow mr-2"), "Overview"],
+            [html.I(className="fas fa-chart-line mr-2"), "Overview"],
             href="/overview", id="overview-link", className="nav-link"
         ),
         dbc.NavLink(
@@ -66,7 +66,7 @@ sidebar = dbc.Nav(
             href="/month", id="month-link", className="nav-link"
         ),
         dbc.NavLink(
-            [html.I(className="fas fa-calendar-quarter mr-2"), "Quarter"],
+            [html.I(className="fas fa-calendar-week mr-2"), "Quarter"],
             href="/quarter", id="quarter-link", className="nav-link"
         ),
         dbc.NavLink(
