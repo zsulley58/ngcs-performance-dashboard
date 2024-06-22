@@ -48,6 +48,32 @@ body {
   padding: 30px 20px;
 }
 
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 1.1rem;
+  gap: 30px;
+}
+
+.nav-link .nav-text {
+  margin-left: 8px;
+}
+
+.side-text {
+  display: flex;
+  color: black !important;
+}
+
+.nav-link:hover {
+  color: orange;
+}
+
+.nav-link.active {
+  background-color: white !important;
+  color: green !important;
+}
+
 .main-content {
   padding: 20px;
 }
@@ -56,22 +82,4 @@ body {
   margin-top: 10px;
   margin-bottom: 5px;
   font-weight: bold;
-}
-
-.radio-items {
-  margin-bottom: 10px;
-}
-
-.radio-items .form-check {
-  display: flex;
-  align-items: center;
-}
-
-.radio-items .form-check .form-check-label {
-  display: flex;
-  align-items: center;
-}
-
-.radio-items .form-check .form-check-label .fas {
-  margin-right: 8px;
 }
