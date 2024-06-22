@@ -36,6 +36,10 @@ navbar = dbc.Navbar(
 sidebar = dbc.Nav(
     [
         dbc.NavLink(
+            [html.I(className="fa-brands fa-stack-overflow mr-2"), "Overview"],
+            href="/overview", id="overview-link", className="nav-link"
+        ),
+        dbc.NavLink(
             [html.I(className="fas fa-tachometer-alt mr-2"), "Pressure"],
             href="/pressure", id="pressure-link", className="nav-link"
         ),

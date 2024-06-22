@@ -4,6 +4,7 @@ body {
   font-family: Arial, sans-serif;
 }
 
+/* Navbar */
 .navbar {
   margin-bottom: 30px;
   border-radius: 5px;
@@ -38,6 +39,7 @@ body {
   gap: 20px;
 }
 
+/* Sidebar */
 .sidebar {
   background-color: #f8f9fa;
   padding: 10px;
