@@ -1,12 +1,30 @@
 import dash
 import dash_bootstrap_components as dbc
 from dash import html, dcc
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
+import plotly.express as px
+import pandas as pd
+import numpy as np
 
 # Initialize the app
 app = dash.Dash(__name__, external_stylesheets=[
     dbc.themes.BOOTSTRAP, "https://use.fontawesome.com/releases/v5.15.4/css/all.css"
 ])
+
+# Sample data
+np.random.seed(42)
+df = pd.DataFrame({
+    "Time": pd.date_range(start="2023-01-01", periods=100, freq="D"),
+    "Pressure": np.random.randn(100).cumsum(),
+    "Temperature": np.random.randn(100).cumsum(),
+    "Flow": np.random.randn(100).cumsum(),
+    "Pressure_Inlet": np.random.randn(100).cumsum(),
+    "Pressure_Outlet": np.random.randn(100).cumsum(),
+    "Temperature_Inlet": np.random.randn(100).cumsum(),
+    "Temperature_Outlet": np.random.randn(100).cumsum(),
+    "Flow_Inlet": np.random.randn(100).cumsum(),
+    "Flow_Outlet": np.random.randn(100).cumsum()
+})
 
 # Define the navbar
 navbar = dbc.Navbar(
@@ -143,23 +161,96 @@ def display_page(overview_clicks, pressure_clicks, temperature_clicks, flow_clic
         button_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
         if button_id == "overview-link":
-            return html.Div("Overview page content")
+            return create_overview_page()
         elif button_id == "pressure-link":
-            return html.Div("Pressure page content")
+            return create_pressure_page()
         elif button_id == "temperature-link":
-            return html.Div("Temperature page content")
+            return create_temperature_page()
         elif button_id == "flow-link":
-            return html.Div("Flow page content")
+            return create_flow_page()
         elif button_id == "day-link":
-            return html.Div("Day page content")
+            return create_time_page("Day")
         elif button_id == "week-link":
-            return html.Div("Week page content")
+            return create_time_page("Week")
         elif button_id == "month-link":
-            return html.Div("Month page content")
+            return create_time_page("Month")
         elif button_id == "quarter-link":
-            return html.Div("Quarter page content")
+            return create_time_page("Quarter")
         elif button_id == "year-link":
-            return html.Div("Year page content")
+            return create_time_page("Year")
+
+# Main content functions
+
+
+def create_overview_page():
+    return html.Div([
+        html.H2("Overview"),
+        create_chart_card("Pressure", df["Pressure"]),
+        create_chart_card("Temperature", df["Temperature"]),
+        create_chart_card("Flow", df["Flow"]),
+        create_line_chart("Overview", df)
+    ])
+
+
+def create_pressure_page():
+    return html.Div([
+        html.H2("Pressure"),
+        create_chart_card("Avg. Pressure", df["Pressure"]),
+        create_line_chart("Pressure Over Time", df, y_column="Pressure"),
+        create_bar_chart("Pressure Inlet vs Outlet", df,
+                         "Pressure_Inlet", "Pressure_Outlet")
+    ])
+
+
+def create_temperature_page():
+    return html.Div([
+        html.H2("Temperature"),
+        create_chart_card("Avg. Temperature", df["Temperature"]),
+        create_line_chart("Temperature Over Time", df, y_column="Temperature"),
+        create_bar_chart("Temperature Inlet vs Outlet", df,
+                         "Temperature_Inlet", "Temperature_Outlet")
+    ])
+
+
+def create_flow_page():
+    return html.Div([
+        html.H2("Flow"),
+        create_chart_card("Avg. Flow", df["Flow"]),
+        create_line_chart("Flow Over Time", df, y_column="Flow"),
+        create_bar_chart("Flow Inlet vs Outlet", df,
+                         "Flow_Inlet", "Flow_Outlet")
+    ])
+
+
+def create_time_page(time_range):
+    return html.Div([
+        html.H2(f"{time_range} Report"),
+        create_chart_card(f"Avg. {time_range} Pressure", df["Pressure"]),
+        create_chart_card(f"Avg. {time_range} Temperature", df["Temperature"]),
+        create_chart_card(f"Avg. {time_range} Flow", df["Flow"]),
+        create_line_chart(f"{time_range} Report", df)
+    ])
+
+
+def create_chart_card(title, data):
+    avg_value = data.mean()
+    return dbc.Card(
+        dbc.CardBody([
+            html.H5(title, className="card-title"),
+            html.P(f"{avg_value:.2f}", className="card-text")
+        ]),
+        className="mb-3"
+    )
+
+
+def create_line_chart(title, df, y_column="Pressure"):
+    fig = px.line(df, x="Time", y=y_column, title=title)
+    return dcc.Graph(figure=fig)
+
+
+def create_bar_chart(title, df, y_column1, y_column2):
+    fig = px.bar(df, x="Time", y=[y_column1, y_column2], title=title)
+    return dcc.Graph(figure=fig)
 
 
 if __name__ == "__main__":
