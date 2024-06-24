@@ -1,96 +1,110 @@
+/* assets/style.css */
+
+/* General styles */
 body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
   margin: 0;
   padding: 0;
-  font-family: Arial, sans-serif;
 }
 
-/* Navbar */
-.navbar {
-  margin-bottom: 30px;
-  border-radius: 5px;
-  box-shadow: 1px -1px 20px rgba(0, 0, 0, 0.2);
-  padding: 10px 20px;
-  top: 20px;
-  background-color: #02478b;
-}
-
-.navbar-logo {
-  margin-right: 10px;
-  height: 70px;
-}
-
-.navbar-brand {
-  font-family: "Roboto", sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
+.container {
   display: flex;
-  justify-content: center;
-  width: 100%;
-  text-align: center;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.mx-auto {
-  color: #007bff;
-  font-size: 2rem;
-  display: flex;
-  gap: 20px;
-}
-
-/* Sidebar */
-.sidebar {
-  background-color: #f8f9fa;
+  flex-direction: column;
   height: 100vh;
-  border-radius: 5px;
-  box-shadow: 1px -1px 20px rgba(0, 0, 0, 0.2);
-  padding: 30px 20px;
 }
 
-.nav-link {
-  display: grid;
-  grid-template-columns: 0.3fr 1fr;
+.navbar {
+  background-color: #343a40;
+  color: white;
+  padding: 10px;
+  display: flex;
   align-items: center;
-  padding: 8px 8px;
-  font-size: 1.1rem;
+  justify-content: space-between;
 }
 
-.nav-link .nav-text {
-  margin-left: 8px;
+.navbar .logo {
+  height: 40px;
+  margin-right: 10px;
 }
 
-.nav-link:hover {
-  color: orange;
-}
-
-.nav-link.active {
-  background-color: white !important;
-  color: green !important;
-}
-
-/* Main Content */
-.main-content {
+.sidebar {
+  background-color: #343a40;
+  color: white;
   padding: 20px;
+  width: 250px;
+  height: 100%;
+  position: fixed;
 }
 
-.sidebar-title {
-  margin-top: 10px;
-  margin-bottom: 5px;
-  font-weight: bold;
+.sidebar h2 {
+  margin-top: 0;
 }
 
-/* Card Styles */
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 600;
+.sidebar .sidebar-link {
+  display: block;
+  padding: 10px 0;
+  color: #adb5bd;
+  text-decoration: none;
+  transition: color 0.3s;
 }
 
-.card-text {
-  font-size: 1.5rem;
-  font-weight: 700;
+.sidebar .sidebar-link:hover {
+  color: #ffffff;
 }
 
-.mb-3 {
-  margin-bottom: 1rem;
+.sidebar .radio-items {
+  margin-top: 20px;
+}
+
+.main-content {
+  margin-left: 250px;
+  padding: 20px;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.cards {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.card {
+  background-color: #ffffff;
+  padding: 20px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  width: 30%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card h3 {
+  margin: 0;
+  color: #343a40;
+}
+
+.card p {
+  margin: 10px 0 0;
+  color: #6c757d;
+}
+
+.graph {
+  background-color: #ffffff;
+  padding: 20px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.graph h3 {
+  margin-top: 0;
+  color: #343a40;
 }

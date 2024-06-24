@@ -1,257 +1,208 @@
+"""
+This module creates a Plant Performance Dashboard using Dash.
+The dashboard includes a navbar, sidebar, and main content area
+with cards displaying current values of parameters, a line graph
+showing trends over time, historical comparison graphs, and a bar chart
+and donut chart showing averages of these parameters.
+"""
+
 import dash
-import dash_bootstrap_components as dbc
-from dash import html, dcc
+from dash import dcc, html
 from dash.dependencies import Input, Output
 import plotly.express as px
+import plotly.graph_objs as go
 import pandas as pd
-import numpy as np
 
-# Initialize the app
-app = dash.Dash(__name__, external_stylesheets=[
-    dbc.themes.BOOTSTRAP, "https://use.fontawesome.com/releases/v5.15.4/css/all.css"
-])
+# Load the data from the Excel file
+FILE_PATH = 'raw_cleaned_data.xlsx'
+data = pd.read_excel(FILE_PATH)
 
-# Sample data
-np.random.seed(42)
-df = pd.DataFrame({
-    "Time": pd.date_range(start="2023-01-01", periods=100, freq="D"),
-    "Pressure": np.random.randn(100).cumsum(),
-    "Temperature": np.random.randn(100).cumsum(),
-    "Flow": np.random.randn(100).cumsum(),
-    "Pressure_Inlet": np.random.randn(100).cumsum(),
-    "Pressure_Outlet": np.random.randn(100).cumsum(),
-    "Temperature_Inlet": np.random.randn(100).cumsum(),
-    "Temperature_Outlet": np.random.randn(100).cumsum(),
-    "Flow_Inlet": np.random.randn(100).cumsum(),
-    "Flow_Outlet": np.random.randn(100).cumsum()
-})
+# Print the column names to verify
+print(data.columns)
 
-# Define the navbar
-navbar = dbc.Navbar(
-    dbc.Container(
-        [
-            html.A(
-                html.Img(src="/assets/ghanagas_logo.png",
-                         height="60px", className="navbar-logo"),
-                href="/",
-            ),
-            dbc.NavbarBrand(
-                [
-                    "AMCS PERFORMANCE REPORT DASHBOARD",
-                    html.I(className="fas fa-chart-line ml-2")
-                ],
-                className="mx-auto"
-            ),
-        ],
-        fluid=True,
-    ),
-    dark=True,
-    className="navbar"
+# Use 'Day' as the date column
+DATE_COLUMN = 'Day'
+
+# Convert the date column to datetime format
+data[DATE_COLUMN] = pd.to_datetime(data[DATE_COLUMN])
+
+# Initialize the Dash app
+app = dash.Dash(__name__)
+
+# Navbar
+navbar = html.Div(
+    className='navbar',
+    children=[
+        html.Img(src='/assets/ghanagas_logo.png', className='logo'),
+        html.H1('Plant Performance Dashboard')
+    ]
 )
 
-# Define the sidebar
-sidebar = dbc.Nav(
-    [
-        dbc.NavLink(
-            [html.I(className="fas fa-chart-line mr-2"),
-             html.Span("Overview")],
-            href="/overview", id="overview-link", className="nav-link"
-        ),
-        dbc.NavLink(
-            [html.I(className="fas fa-tachometer-alt mr-2"),
-             html.Span("Pressure")],
-            href="/pressure", id="pressure-link", className="nav-link"
-        ),
-        dbc.NavLink(
-            [html.I(className="fas fa-thermometer-half mr-2"),
-             html.Span("Temperature")],
-            href="/temperature", id="temperature-link", className="nav-link"
-        ),
-        dbc.NavLink(
-            [html.I(className="fas fa-water mr-2"), html.Span("Flow")],
-            href="/flow", id="flow-link", className="nav-link"
-        ),
-        html.Hr(),
-        dbc.NavLink(
-            [html.I(className="fas fa-calendar-day mr-2"), html.Span("Day")],
-            href="/day", id="day-link", className="nav-link"
-        ),
-        dbc.NavLink(
-            [html.I(className="fas fa-calendar-week mr-2"), html.Span("Week")],
-            href="/week", id="week-link", className="nav-link"
-        ),
-        dbc.NavLink(
-            [html.I(className="fas fa-calendar-alt mr-2"), html.Span("Month")],
-            href="/month", id="month-link", className="nav-link"
-        ),
-        dbc.NavLink(
-            [html.I(className="fas fa-calendar-week mr-2"),
-             html.Span("Quarter")],
-            href="/quarter", id="quarter-link", className="nav-link"
-        ),
-        dbc.NavLink(
-            [html.I(className="fas fa-calendar mr-2"), html.Span("Year")],
-            href="/year", id="year-link", className="nav-link"
-        ),
-    ],
-    vertical=True,
-    pills=True,
-    className="sidebar"
+# Sidebar
+sidebar = html.Div(
+    className='sidebar',
+    children=[
+        html.H2('Navigation'),
+        dcc.Link('Overview', href='/overview', className='sidebar-link'),
+        dcc.Link('Pressure', href='/pressure', className='sidebar-link'),
+        dcc.Link('Temperature', href='/temperature', className='sidebar-link'),
+        dcc.Link('Flow', href='/flow', className='sidebar-link'),
+        html.H2('Time Range'),
+        dcc.RadioItems(
+            id='time-range',
+            options=[
+                {'label': 'Day', 'value': 'D'},
+                {'label': 'Week', 'value': 'W'},
+                {'label': 'Month', 'value': 'ME'},
+                {'label': 'Quarter', 'value': 'Q'},
+                {'label': 'Year', 'value': 'A'},
+            ],
+            value='ME',  # Month-end
+            className='radio-items'
+        )
+    ]
 )
 
-# Define the layout
-app.layout = dbc.Container(
-    [
-        navbar,
-        dbc.Row(
-            [
-                dbc.Col(sidebar, width=2),
-                dbc.Col(html.Div(id="page-content",
-                        className="main-content"), width=10),
+# Main Content
+main_content = html.Div(
+    className='main-content',
+    children=[
+        html.Div(
+            className='cards',
+            children=[
+                html.Div(id='pressure-card', className='card'),
+                html.Div(id='temperature-card', className='card'),
+                html.Div(id='flow-card', className='card')
             ]
         ),
-    ],
-    fluid=True,
+        dcc.Graph(id='line-graph'),
+        dcc.Graph(id='bar-chart'),
+        dcc.Graph(id='donut-chart'),
+        dcc.Graph(id='comparison-graph')
+    ]
 )
 
-# Define the callback for page navigation and time range selection
+# App Layout
+app.layout = html.Div(
+    className='container',
+    children=[
+        navbar,
+        sidebar,
+        main_content
+    ]
+)
 
 
 @app.callback(
-    [Output(f"{link}-link", "className") for link in ["overview", "pressure",
-                                                      "temperature", "flow", "day", "week", "month", "quarter", "year"]],
-    [Input("overview-link", "n_clicks"),
-     Input("pressure-link", "n_clicks"),
-     Input("temperature-link", "n_clicks"),
-     Input("flow-link", "n_clicks"),
-     Input("day-link", "n_clicks"),
-     Input("week-link", "n_clicks"),
-     Input("month-link", "n_clicks"),
-     Input("quarter-link", "n_clicks"),
-     Input("year-link", "n_clicks")]
+    [Output('pressure-card', 'children'),
+     Output('temperature-card', 'children'),
+     Output('flow-card', 'children'),
+     Output('line-graph', 'figure'),
+     Output('bar-chart', 'figure'),
+     Output('donut-chart', 'figure'),
+     Output('comparison-graph', 'figure')],
+    [Input('time-range', 'value')]
 )
-def update_active_link(*args):
-    ctx = dash.callback_context
+def update_dashboard(time_range):
+    """
+    Update the dashboard based on the selected time range.
 
-    if not ctx.triggered:
-        return ["nav-link"] * 9
+    Parameters:
+    time_range (str): The selected time range for resampling the data.
+
+    Returns:
+    tuple: Updated values for the pressure, temperature, and flow cards,
+           and updated figures for the line graph, bar chart, donut chart,
+           and historical comparison graph.
+    """
+    # Adjust the time range to use 'ME' for month-end
+    time_range = 'ME' if time_range == 'M' else time_range
+
+    # Filter data based on the selected time range
+    filtered_data = data.set_index(DATE_COLUMN).resample(
+        time_range).mean().reset_index()
+
+    # Get the latest values for the cards
+    pressure = filtered_data['Inlet Pressure (barg)'].iloc[-1]
+    temperature = filtered_data['Inlet Temperature °C'].iloc[-1]
+    flow = filtered_data['Inlet Flow (MMscfd)'].iloc[-1]
+
+    # Create cards content
+    pressure_card = f'Pressure: {pressure:.2f}'
+    temperature_card = f'Temperature: {temperature:.2f}'
+    flow_card = f'Flow: {flow:.2f}'
+
+    # Create line graph
+    line_fig = px.line(
+        filtered_data, x=DATE_COLUMN,
+        y=['Inlet Pressure (barg)', 'Inlet Temperature °C',
+           'Inlet Flow (MMscfd)'],
+        title='Parameters Over Time'
+    )
+
+    # Create bar chart
+    avg_pressure = filtered_data['Inlet Pressure (barg)'].mean()
+    avg_temperature = filtered_data['Inlet Temperature °C'].mean()
+    avg_flow = filtered_data['Inlet Flow (MMscfd)'].mean()
+    bar_fig = go.Figure(
+        data=[go.Bar(x=['Pressure', 'Temperature', 'Flow'],
+                     y=[avg_pressure, avg_temperature, avg_flow])]
+    )
+    bar_fig.update_layout(title='Average Parameters')
+
+    # Create donut chart
+    donut_fig = go.Figure(
+        data=[go.Pie(labels=['Pressure', 'Temperature', 'Flow'],
+                     values=[avg_pressure, avg_temperature, avg_flow], hole=.3)]
+    )
+    donut_fig.update_layout(title='Parameters Distribution')
+
+    # Create historical comparison graph
+    # Compare with the previous period
+    if time_range == 'ME':
+        prev_period_data = data.set_index(DATE_COLUMN).resample(
+            'M').mean().shift(1).reset_index()
+    elif time_range == 'A':
+        prev_period_data = data.set_index(DATE_COLUMN).resample(
+            'A').mean().shift(1).reset_index()
+    elif time_range == 'Q':
+        prev_period_data = data.set_index(DATE_COLUMN).resample(
+            'Q').mean().shift(1).reset_index()
+    elif time_range == 'W':
+        prev_period_data = data.set_index(DATE_COLUMN).resample(
+            'W').mean().shift(1).reset_index()
+    elif time_range == 'D':
+        prev_period_data = data.set_index(DATE_COLUMN).resample(
+            'D').mean().shift(1).reset_index()
     else:
-        button_id = ctx.triggered[0]["prop_id"].split(".")[0]
-        return ["nav-link active" if f"{link}-link" == button_id else "nav-link" for link in ["overview", "pressure", "temperature", "flow", "day", "week", "month", "quarter", "year"]]
+        prev_period_data = data.set_index(DATE_COLUMN).resample(
+            'ME').mean().shift(1).reset_index()
 
+    comparison_fig = go.Figure()
+    comparison_fig.add_trace(go.Scatter(x=filtered_data[DATE_COLUMN], y=filtered_data['Inlet Pressure (barg)'],
+                                        mode='lines', name='Current Period Pressure'))
+    comparison_fig.add_trace(go.Scatter(x=prev_period_data[DATE_COLUMN], y=prev_period_data['Inlet Pressure (barg)'],
+                                        mode='lines', name='Previous Period Pressure', line=dict(dash='dash')))
+    comparison_fig.add_trace(go.Scatter(x=filtered_data[DATE_COLUMN], y=filtered_data['Inlet Temperature °C'],
+                                        mode='lines', name='Current Period Temperature'))
+    comparison_fig.add_trace(go.Scatter(x=prev_period_data[DATE_COLUMN], y=prev_period_data['Inlet Temperature °C'],
+                                        mode='lines', name='Previous Period Temperature', line=dict(dash='dash')))
+    comparison_fig.add_trace(go.Scatter(x=filtered_data[DATE_COLUMN], y=filtered_data['Inlet Flow (MMscfd)'],
+                                        mode='lines', name='Current Period Flow'))
+    comparison_fig.add_trace(go.Scatter(x=prev_period_data[DATE_COLUMN], y=prev_period_data['Inlet Flow (MMscfd)'],
+                                        mode='lines', name='Previous Period Flow', line=dict(dash='dash')))
+    comparison_fig.update_layout(title='Historical Comparison')
 
-@app.callback(
-    Output("page-content", "children"),
-    [Input("overview-link", "n_clicks"),
-     Input("pressure-link", "n_clicks"),
-     Input("temperature-link", "n_clicks"),
-     Input("flow-link", "n_clicks"),
-     Input("day-link", "n_clicks"),
-     Input("week-link", "n_clicks"),
-     Input("month-link", "n_clicks"),
-     Input("quarter-link", "n_clicks"),
-     Input("year-link", "n_clicks")]
-)
-def display_page(overview_clicks, pressure_clicks, temperature_clicks, flow_clicks, day_clicks, week_clicks, month_clicks, quarter_clicks, year_clicks):
-    ctx = dash.callback_context
-
-    if not ctx.triggered:
-        return html.Div("Welcome to the AMCS PERFORMANCE REPORT DASHBOARD")
-    else:
-        button_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-        if button_id == "overview-link":
-            return create_overview_page()
-        elif button_id == "pressure-link":
-            return create_pressure_page()
-        elif button_id == "temperature-link":
-            return create_temperature_page()
-        elif button_id == "flow-link":
-            return create_flow_page()
-        elif button_id == "day-link":
-            return create_time_page("Day")
-        elif button_id == "week-link":
-            return create_time_page("Week")
-        elif button_id == "month-link":
-            return create_time_page("Month")
-        elif button_id == "quarter-link":
-            return create_time_page("Quarter")
-        elif button_id == "year-link":
-            return create_time_page("Year")
-
-# Main content functions
-
-
-def create_overview_page():
-    return html.Div([
-        html.H2("Overview"),
-        create_chart_card("Pressure", df["Pressure"]),
-        create_chart_card("Temperature", df["Temperature"]),
-        create_chart_card("Flow", df["Flow"]),
-        create_line_chart("Overview", df)
-    ])
-
-
-def create_pressure_page():
-    return html.Div([
-        html.H2("Pressure"),
-        create_chart_card("Avg. Pressure", df["Pressure"]),
-        create_line_chart("Pressure Over Time", df, y_column="Pressure"),
-        create_bar_chart("Pressure Inlet vs Outlet", df,
-                         "Pressure_Inlet", "Pressure_Outlet")
-    ])
-
-
-def create_temperature_page():
-    return html.Div([
-        html.H2("Temperature"),
-        create_chart_card("Avg. Temperature", df["Temperature"]),
-        create_line_chart("Temperature Over Time", df, y_column="Temperature"),
-        create_bar_chart("Temperature Inlet vs Outlet", df,
-                         "Temperature_Inlet", "Temperature_Outlet")
-    ])
-
-
-def create_flow_page():
-    return html.Div([
-        html.H2("Flow"),
-        create_chart_card("Avg. Flow", df["Flow"]),
-        create_line_chart("Flow Over Time", df, y_column="Flow"),
-        create_bar_chart("Flow Inlet vs Outlet", df,
-                         "Flow_Inlet", "Flow_Outlet")
-    ])
-
-
-def create_time_page(time_range):
-    return html.Div([
-        html.H2(f"{time_range} Report"),
-        create_chart_card(f"Avg. {time_range} Pressure", df["Pressure"]),
-        create_chart_card(f"Avg. {time_range} Temperature", df["Temperature"]),
-        create_chart_card(f"Avg. {time_range} Flow", df["Flow"]),
-        create_line_chart(f"{time_range} Report", df)
-    ])
-
-
-def create_chart_card(title, data):
-    avg_value = data.mean()
-    return dbc.Card(
-        dbc.CardBody([
-            html.H5(title, className="card-title"),
-            html.P(f"{avg_value:.2f}", className="card-text")
-        ]),
-        className="mb-3"
+    return (
+        pressure_card,
+        temperature_card,
+        flow_card,
+        line_fig,
+        bar_fig,
+        donut_fig,
+        comparison_fig
     )
 
 
-def create_line_chart(title, df, y_column="Pressure"):
-    fig = px.line(df, x="Time", y=y_column, title=title)
-    return dcc.Graph(figure=fig)
-
-
-def create_bar_chart(title, df, y_column1, y_column2):
-    fig = px.bar(df, x="Time", y=[y_column1, y_column2], title=title)
-    return dcc.Graph(figure=fig)
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run_server(debug=True)
